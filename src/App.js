@@ -59,13 +59,33 @@ function App() {
     setLoading(true);
     setMessage('');
     const payload = uploadedFiles.map((image) => ({
-      imageName: image.file.name,
-      imageBase64: image.base64, // Send Base64 string
+      // imageName: image.file.name,
+      // imageBase64: image.base64, // Send Base64 string
+      // startDate: new Date().toISOString().split('T')[0], // Today's date
+      // endDate: new Date().toISOString().split('T')[0], // Replace with actual end date
+      // startTime: '08:00:00', // Replace with actual start time
+      // endTime: '18:00:00', // Replace with actual end time
+      // duration: divideTime ? calculateDividedDuration() : image.duration,
+
+
+
+
+
+      id: 10,
+      imageName: "examplezzz3.jpg",
+      imageUrl: image.base64,
       startDate: new Date().toISOString().split('T')[0], // Today's date
       endDate: new Date().toISOString().split('T')[0], // Replace with actual end date
       startTime: '08:00:00', // Replace with actual start time
       endTime: '18:00:00', // Replace with actual end time
       duration: divideTime ? calculateDividedDuration() : image.duration,
+      updatedAt: "2024-11-19T10:31:59.553Z",
+      createdAt: "2024-11-19T10:31:59.553Z"
+
+
+
+
+
     }));
 
     try {
