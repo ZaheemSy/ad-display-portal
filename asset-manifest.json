@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/ad-display-portal/static/css/main.e6c13ad2.css",
+    "main.js": "/ad-display-portal/static/js/main.2bc0e953.js",
+    "index.html": "/ad-display-portal/index.html",
+    "main.e6c13ad2.css.map": "/ad-display-portal/static/css/main.e6c13ad2.css.map",
+    "main.2bc0e953.js.map": "/ad-display-portal/static/js/main.2bc0e953.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.e6c13ad2.css",
+    "static/js/main.2bc0e953.js"
+  ]
+}
