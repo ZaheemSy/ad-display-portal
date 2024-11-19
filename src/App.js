@@ -55,51 +55,49 @@ function App() {
     return uploadedFiles.some((image) => image.duration === 0);
   };
 
+  
+  
   const handleSubmit = async () => {
     setLoading(true);
     setMessage('');
-    
-    for (const image of uploadedFiles) {
-      const payload = {
-        imageName: image.file.name, // Use the actual file name
-        imageUrl: image.base64,    // Base64-encoded string
-        startDate: "2024-11-20",   // Replace with actual start date
-        endDate: "2024-11-25",     // Replace with actual end date
-        startTime: "08:00:00",     // Replace with actual start time
-        endTime: "18:00:00",       // Replace with actual end time
-        duration: divideTime ? calculateDividedDuration() : Number(image.duration), // Ensure duration is a number
-      };
   
-      try {
+    try {
+      for (const image of uploadedFiles) {
+        const payload = {
+          imageName: image.file.name, // Use the actual file name
+          imageUrl: image.base64,    // Base64-encoded string
+          startDate: "2024-11-20",   // Replace with actual start date
+          endDate: "2024-11-25",     // Replace with actual end date
+          startTime: "08:00:00",     // Replace with actual start time
+          endTime: "18:00:00",       // Replace with actual end time
+          duration: divideTime ? calculateDividedDuration() : Number(image.duration), // Ensure duration is a number
+        };
+  
         const response = await fetch('https://ad-display-backend.onrender.com/api/images', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(payload), // Send single image payload
+          body: JSON.stringify(payload), // Send individual payload
         });
   
-        if (response.ok) {
-          const result = await response.json();
-          console.log('Image successfully uploaded:', result);
-          setMessage('Image uploaded successfully!');
-        } else {
+        if (!response.ok) {
           const errorData = await response.json();
           console.error('Error uploading image:', errorData.error);
-          setMessage(errorData.error || 'Failed to upload an image. Please try again.');
-          break; // Stop further uploads on error
+          setMessage(errorData.error || 'Failed to upload an image.');
+          return; // Exit on failure
         }
-      } catch (err) {
-        console.error('Error:', err);
-        setMessage('An error occurred while uploading an image.');
-        break; // Stop further uploads on error
       }
+  
+      setMessage('Images uploaded successfully!');
+      setUploadedFiles([]); // Clear files after successful upload
+    } catch (err) {
+      console.error('Error:', err);
+      setMessage('An error occurred while uploading images.');
+    } finally {
+      setLoading(false);
     }
-  
-    setLoading(false);
-    setUploadedFiles([]); // Clear all files after the upload process
   };
-  
   
   
 
