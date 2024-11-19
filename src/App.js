@@ -71,7 +71,7 @@ function App() {
 
 
 
-      id: 10,
+ 
       imageName: "examplezzz3.jpg",
       imageUrl: image.base64,
       startDate: new Date().toISOString().split('T')[0], // Today's date
@@ -79,8 +79,7 @@ function App() {
       startTime: '08:00:00', // Replace with actual start time
       endTime: '18:00:00', // Replace with actual end time
       duration: divideTime ? calculateDividedDuration() : image.duration,
-      updatedAt: "2024-11-19T10:31:59.553Z",
-      createdAt: "2024-11-19T10:31:59.553Z"
+ 
 
 
 
