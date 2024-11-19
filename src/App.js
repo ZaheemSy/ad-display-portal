@@ -58,44 +58,27 @@ function App() {
   const handleSubmit = async () => {
     setLoading(true);
     setMessage('');
+  
+    // Generate payload dynamically
     const payload = uploadedFiles.map((image) => ({
-      // imageName: image.file.name,
-      // imageBase64: image.base64, // Send Base64 string
-      // startDate: new Date().toISOString().split('T')[0], // Today's date
-      // endDate: new Date().toISOString().split('T')[0], // Replace with actual end date
-      // startTime: '08:00:00', // Replace with actual start time
-      // endTime: '18:00:00', // Replace with actual end time
-      // duration: divideTime ? calculateDividedDuration() : image.duration,
-
-
-
-
-
- 
-      imageName: "examplezzz3.jpg",
-      imageUrl: image.base64,
+      imageName: image.file.name, // Use the actual file name
+      imageUrl: image.base64, // Base64-encoded image data
       startDate: new Date().toISOString().split('T')[0], // Today's date
-      endDate: new Date().toISOString().split('T')[0], // Replace with actual end date
+      endDate: new Date().toISOString().split('T')[0], // Replace with the actual end date if needed
       startTime: '08:00:00', // Replace with actual start time
       endTime: '18:00:00', // Replace with actual end time
-      duration: divideTime ? calculateDividedDuration() : image.duration,
- 
-
-
-
-
-
+      duration: divideTime ? calculateDividedDuration() : image.duration, // Calculate or use provided duration
     }));
-
+  
     try {
       const response = await fetch('https://ad-display-backend.onrender.com/api/images', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(payload), // Convert payload to JSON
       });
-
+  
       if (response.ok) {
         const result = await response.json();
         console.log('Images successfully uploaded:', result);
@@ -112,6 +95,7 @@ function App() {
       setLoading(false);
     }
   };
+  
 
   return (
     <div style={{ padding: '20px', fontFamily: 'Arial' }}>
