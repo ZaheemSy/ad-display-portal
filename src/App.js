@@ -1,4 +1,3 @@
-//up 110
 import React, { useState, useEffect } from 'react';
 import ImageUpload from './components/ImageUpload';
 import Resizer from 'react-image-file-resizer';
