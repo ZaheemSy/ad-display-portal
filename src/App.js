@@ -75,6 +75,9 @@ function App() {
         duration: divideTime ? calculateDividedDuration() : Number(image.duration),
       };
 
+
+      console.log("data sending", JSON.stringify(payload))
+
       try {
         const response = await fetch('https://ad-display-backend.onrender.com/api/images', {
           method: 'POST',
