@@ -1,18 +1,35 @@
-// up111
-import React, { useState } from 'react';
+//up 110
+import React, { useState, useEffect } from 'react';
 import ImageUpload from './components/ImageUpload';
 import Resizer from 'react-image-file-resizer';
 
 function App() {
   const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [cloudinaryImages, setCloudinaryImages] = useState([]);
+  const [selectedImages, setSelectedImages] = useState([]);
   const [divideTime, setDivideTime] = useState(false);
   const [totalDuration, setTotalDuration] = useState(0);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
+
+  // Fetch Cloudinary Images on Load
+  useEffect(() => {
+    const fetchCloudinaryImages = async () => {
+      try {
+        const response = await fetch('https://ad-display-backend.onrender.com/api/cloudinary-images');
+        const result = await response.json();
+        if (result.success) {
+          setCloudinaryImages(result.data);
+        } else {
+          console.error(result.error);
+        }
+      } catch (err) {
+        console.error('Error fetching Cloudinary images:', err);
+      }
+    };
+
+    fetchCloudinaryImages();
+  }, []);
 
   const resizeImage = (file) =>
     new Promise((resolve) => {
@@ -61,7 +78,6 @@ function App() {
   };
 
   const isSubmitDisabled = () => {
-    if (!startDate || !endDate || !startTime || !endTime) return true; // Prevent submission if date/time is missing
     if (divideTime || uploadedFiles.length === 0) return false;
     return uploadedFiles.some((image) => image.duration === 0);
   };
@@ -74,10 +90,10 @@ function App() {
       const payload = {
         imageName: image.file.name,
         imageUrl: image.base64,
-        startDate,
-        endDate,
-        startTime,
-        endTime,
+        startDate: '2024-11-20',
+        endDate: '2024-11-25',
+        startTime: '08:00:00',
+        endTime: '18:00:00',
         duration: divideTime ? calculateDividedDuration() : Number(image.duration),
       };
 
@@ -109,62 +125,62 @@ function App() {
     setUploadedFiles([]); // Clear uploaded files after submission
   };
 
+  const handleDeleteImage = async (publicId) => {
+    try {
+      const response = await fetch(`https://ad-display-backend.onrender.com/api/cloudinary-images/${publicId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setCloudinaryImages(cloudinaryImages.filter((image) => image.public_id !== publicId));
+        setMessage(`Image with Public ID ${publicId} deleted successfully!`);
+      } else {
+        const result = await response.json();
+        console.error(result.error);
+        setMessage(result.error);
+      }
+    } catch (err) {
+      console.error('Error deleting image:', err);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    try {
+      const response = await fetch('https://ad-display-backend.onrender.com/api/cloudinary-images/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ public_ids: selectedImages }),
+      });
+
+      if (response.ok) {
+        setCloudinaryImages(
+          cloudinaryImages.filter((image) => !selectedImages.includes(image.public_id))
+        );
+        setSelectedImages([]);
+        setMessage('Selected images deleted successfully!');
+      } else {
+        const result = await response.json();
+        console.error(result.error);
+        setMessage(result.error);
+      }
+    } catch (err) {
+      console.error('Error deleting multiple images:', err);
+    }
+  };
+
+  const toggleSelectImage = (publicId) => {
+    setSelectedImages((prev) =>
+      prev.includes(publicId) ? prev.filter((id) => id !== publicId) : [...prev, publicId]
+    );
+  };
+
   return (
     <div style={{ padding: '20px', fontFamily: 'Arial' }}>
       <h1>Ad Display Portal</h1>
 
-      {/* Date and Time Input */}
-      <div style={{ marginBottom: '20px' }}>
-        <h3>Common Start/End Dates and Times</h3>
-        <div style={{ marginBottom: '10px' }}>
-          <label>
-            Start Date: 
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              style={{ marginLeft: '10px' }}
-            />
-          </label>
-        </div>
-        <div style={{ marginBottom: '10px' }}>
-          <label>
-            End Date: 
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              style={{ marginLeft: '10px' }}
-            />
-          </label>
-        </div>
-        <div style={{ marginBottom: '10px' }}>
-          <label>
-            Start Time: 
-            <input
-              type="time"
-              value={startTime}
-              onChange={(e) => setStartTime(e.target.value)}
-              style={{ marginLeft: '10px' }}
-            />
-          </label>
-        </div>
-        <div style={{ marginBottom: '10px' }}>
-          <label>
-            End Time: 
-            <input
-              type="time"
-              value={endTime}
-              onChange={(e) => setEndTime(e.target.value)}
-              style={{ marginLeft: '10px' }}
-            />
-          </label>
-        </div>
-      </div>
-
-      {/* Upload Section */}
       <ImageUpload onUpload={handleUpload} />
 
+      {/* Upload Section */}
       {uploadedFiles.length > 0 && (
         <div style={{ marginTop: '20px' }}>
           <label>
@@ -190,37 +206,65 @@ function App() {
         </div>
       )}
 
-      {uploadedFiles.length > 0 && (
-        <div style={{ marginTop: '20px' }}>
-          <h3>Uploaded Images</h3>
-          {uploadedFiles.map((image, index) => (
-            <div key={index} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-              <img src={image.base64} alt={image.file.name} style={{ width: '60px', height: '60px' }} />
-              <input
-                type="number"
-                value={divideTime ? calculateDividedDuration() : image.duration}
-                onChange={(e) => handleDurationChange(index, e.target.value)}
-                disabled={divideTime}
-                style={{ marginLeft: '10px' }}
-              />
-              <button onClick={() => handleRemoveImage(index)} style={{ marginLeft: '10px' }}>
-                Remove
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
+      {/* Cloudinary Image Management */}
+      <div>
+        <h2>Cloudinary Images</h2>
+        {cloudinaryImages.length > 0 && (
+          <div>
+            <button onClick={handleBulkDelete} disabled={selectedImages.length === 0}>
+              Delete Selected Images
+            </button>
+            <table>
+              <thead>
+                <tr>
+                  <th>
+                    <input
+                      type="checkbox"
+                      checked={selectedImages.length === cloudinaryImages.length}
+                      onChange={() =>
+                        setSelectedImages(
+                          selectedImages.length === cloudinaryImages.length
+                            ? []
+                            : cloudinaryImages.map((img) => img.public_id)
+                        )
+                      }
+                    />
+                  </th>
+                  <th>Preview</th>
+                  <th>Public ID</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cloudinaryImages.map((image) => (
+                  <tr key={image.public_id}>
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={selectedImages.includes(image.public_id)}
+                        onChange={() => toggleSelectImage(image.public_id)}
+                      />
+                    </td>
+                    <td>
+                      <img src={image.url} alt={image.public_id} style={{ width: '100px' }} />
+                    </td>
+                    <td>{image.public_id}</td>
+                    <td>
+                      <button onClick={() => handleDeleteImage(image.public_id)}>Delete</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
       {/* Submit Button */}
       <button
         onClick={handleSubmit}
         disabled={isSubmitDisabled() || loading}
-        style={{
-          marginTop: '20px',
-          padding: '10px 20px',
-          backgroundColor: isSubmitDisabled() ? 'grey' : 'blue',
-          color: 'white',
-        }}
+        style={{ marginTop: '20px', padding: '10px 20px', backgroundColor: 'blue', color: 'white' }}
       >
         {loading ? 'Uploading...' : 'Submit'}
       </button>
