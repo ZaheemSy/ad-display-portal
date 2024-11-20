@@ -1,34 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import ImageUpload from './components/ImageUpload';
 import Resizer from 'react-image-file-resizer';
 
 function App() {
   const [uploadedFiles, setUploadedFiles] = useState([]);
-  const [cloudinaryImages, setCloudinaryImages] = useState([]);
-  const [selectedImages, setSelectedImages] = useState([]);
   const [divideTime, setDivideTime] = useState(false);
   const [totalDuration, setTotalDuration] = useState(0);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-
-  // Fetch Cloudinary Images on Load
-  useEffect(() => {
-    const fetchCloudinaryImages = async () => {
-      try {
-        const response = await fetch('https://ad-display-backend.onrender.com/api/cloudinary-images');
-        const result = await response.json();
-        if (result.success) {
-          setCloudinaryImages(result.data);
-        } else {
-          console.error(result.error);
-        }
-      } catch (err) {
-        console.error('Error fetching Cloudinary images:', err);
-      }
-    };
-
-    fetchCloudinaryImages();
-  }, []);
 
   const resizeImage = (file) =>
     new Promise((resolve) => {
@@ -96,6 +75,9 @@ function App() {
         duration: divideTime ? calculateDividedDuration() : Number(image.duration),
       };
 
+
+      console.log("data sendingggg", JSON.stringify(payload))
+
       try {
         const response = await fetch('https://ad-display-backend.onrender.com/api/images', {
           method: 'POST',
@@ -124,62 +106,12 @@ function App() {
     setUploadedFiles([]); // Clear uploaded files after submission
   };
 
-  const handleDeleteImage = async (publicId) => {
-    try {
-      const response = await fetch(`https://ad-display-backend.onrender.com/api/cloudinary-images/${publicId}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        setCloudinaryImages(cloudinaryImages.filter((image) => image.public_id !== publicId));
-        setMessage(`Image with Public ID ${publicId} deleted successfully!`);
-      } else {
-        const result = await response.json();
-        console.error(result.error);
-        setMessage(result.error);
-      }
-    } catch (err) {
-      console.error('Error deleting image:', err);
-    }
-  };
-
-  const handleBulkDelete = async () => {
-    try {
-      const response = await fetch('https://ad-display-backend.onrender.com/api/cloudinary-images/delete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ public_ids: selectedImages }),
-      });
-
-      if (response.ok) {
-        setCloudinaryImages(
-          cloudinaryImages.filter((image) => !selectedImages.includes(image.public_id))
-        );
-        setSelectedImages([]);
-        setMessage('Selected images deleted successfully!');
-      } else {
-        const result = await response.json();
-        console.error(result.error);
-        setMessage(result.error);
-      }
-    } catch (err) {
-      console.error('Error deleting multiple images:', err);
-    }
-  };
-
-  const toggleSelectImage = (publicId) => {
-    setSelectedImages((prev) =>
-      prev.includes(publicId) ? prev.filter((id) => id !== publicId) : [...prev, publicId]
-    );
-  };
-
   return (
     <div style={{ padding: '20px', fontFamily: 'Arial' }}>
       <h1>Ad Display Portal</h1>
 
       <ImageUpload onUpload={handleUpload} />
 
-      {/* Upload Section */}
       {uploadedFiles.length > 0 && (
         <div style={{ marginTop: '20px' }}>
           <label>
@@ -205,61 +137,27 @@ function App() {
         </div>
       )}
 
-      {/* Cloudinary Image Management */}
-      <div>
-        <h2>Cloudinary Images</h2>
-        {cloudinaryImages.length > 0 && (
-          <div>
-            <button onClick={handleBulkDelete} disabled={selectedImages.length === 0}>
-              Delete Selected Images
-            </button>
-            <table>
-              <thead>
-                <tr>
-                  <th>
-                    <input
-                      type="checkbox"
-                      checked={selectedImages.length === cloudinaryImages.length}
-                      onChange={() =>
-                        setSelectedImages(
-                          selectedImages.length === cloudinaryImages.length
-                            ? []
-                            : cloudinaryImages.map((img) => img.public_id)
-                        )
-                      }
-                    />
-                  </th>
-                  <th>Preview</th>
-                  <th>Public ID</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {cloudinaryImages.map((image) => (
-                  <tr key={image.public_id}>
-                    <td>
-                      <input
-                        type="checkbox"
-                        checked={selectedImages.includes(image.public_id)}
-                        onChange={() => toggleSelectImage(image.public_id)}
-                      />
-                    </td>
-                    <td>
-                      <img src={image.url} alt={image.public_id} style={{ width: '100px' }} />
-                    </td>
-                    <td>{image.public_id}</td>
-                    <td>
-                      <button onClick={() => handleDeleteImage(image.public_id)}>Delete</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      {uploadedFiles.length > 0 && (
+        <div style={{ marginTop: '20px' }}>
+          <h3>Uploaded Images</h3>
+          {uploadedFiles.map((image, index) => (
+            <div key={index} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+              <img src={image.base64} alt={image.file.name} style={{ width: '60px', height: '60px' }} />
+              <input
+                type="number"
+                value={divideTime ? calculateDividedDuration() : image.duration}
+                onChange={(e) => handleDurationChange(index, e.target.value)}
+                disabled={divideTime}
+                style={{ marginLeft: '10px' }}
+              />
+              <button onClick={() => handleRemoveImage(index)} style={{ marginLeft: '10px' }}>
+                Remove
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
 
-      {/* Submit Button */}
       <button
         onClick={handleSubmit}
         disabled={isSubmitDisabled() || loading}
@@ -268,7 +166,6 @@ function App() {
         {loading ? 'Uploading...' : 'Submit'}
       </button>
 
-      {/* Message */}
       {message && <p style={{ marginTop: '20px', color: 'red' }}>{message}</p>}
     </div>
   );
