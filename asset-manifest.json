@@ -1,15 +1,13 @@
 {
   "files": {
-    "main.css": "/ad-display-portal/static/css/main.5ecd60fb.chunk.css",
-    "main.js": "/ad-display-portal/static/js/main.a44695d6.chunk.js",
-    "main.js.map": "/ad-display-portal/static/js/main.a44695d6.chunk.js.map",
-    "runtime~main.js": "/ad-display-portal/static/js/runtime~main.b05952b4.js",
-    "runtime~main.js.map": "/ad-display-portal/static/js/runtime~main.b05952b4.js.map",
-    "static/js/2.c4996e9c.chunk.js": "/ad-display-portal/static/js/2.c4996e9c.chunk.js",
-    "static/js/2.c4996e9c.chunk.js.map": "/ad-display-portal/static/js/2.c4996e9c.chunk.js.map",
+    "main.css": "/ad-display-portal/static/css/main.e6c13ad2.css",
+    "main.js": "/ad-display-portal/static/js/main.ea7c1062.js",
     "index.html": "/ad-display-portal/index.html",
-    "precache-manifest.6810a7d083b855dd0b1c561384430ebd.js": "/ad-display-portal/precache-manifest.6810a7d083b855dd0b1c561384430ebd.js",
-    "service-worker.js": "/ad-display-portal/service-worker.js",
-    "static/css/main.5ecd60fb.chunk.css.map": "/ad-display-portal/static/css/main.5ecd60fb.chunk.css.map"
-  }
+    "main.e6c13ad2.css.map": "/ad-display-portal/static/css/main.e6c13ad2.css.map",
+    "main.ea7c1062.js.map": "/ad-display-portal/static/js/main.ea7c1062.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.e6c13ad2.css",
+    "static/js/main.ea7c1062.js"
+  ]
 }
