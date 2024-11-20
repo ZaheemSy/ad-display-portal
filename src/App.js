@@ -63,41 +63,44 @@ function App() {
   const handleSubmit = async () => {
     setLoading(true);
     setMessage('');
-    const payload = uploadedFiles.map((image) => ({
-      imageName: image.file.name,
-      imageUrl: image.base64,
-      startDate: '2024-11-20',
-      endDate: '2024-11-25',
-      startTime: '08:00:00',
-      endTime: '18:00:00',
-      duration: divideTime ? calculateDividedDuration() : Number(image.duration),
-    }));
 
-    try {
-      const response = await fetch('https://ad-display-backend.onrender.com/api/images', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
+    for (const image of uploadedFiles) {
+      const payload = {
+        imageName: image.file.name,
+        imageUrl: image.base64,
+        startDate: '2024-11-20',
+        endDate: '2024-11-25',
+        startTime: '08:00:00',
+        endTime: '18:00:00',
+        duration: divideTime ? calculateDividedDuration() : Number(image.duration),
+      };
 
-      if (response.ok) {
-        const result = await response.json();
-        console.log('Images successfully uploaded:', result);
-        setMessage('Images uploaded successfully!');
-        setUploadedFiles([]);
-      } else {
-        const errorData = await response.json();
-        console.error('Error uploading images:', errorData.error);
-        setMessage(errorData.error || 'Failed to upload images. Please try again.');
+      try {
+        const response = await fetch('https://ad-display-backend.onrender.com/api/images', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log(`Image ${image.file.name} uploaded successfully:`, result);
+          setMessage(`Image ${image.file.name} uploaded successfully!`);
+        } else {
+          const errorData = await response.json();
+          console.error(`Error uploading ${image.file.name}:`, errorData.error);
+          setMessage(errorData.error || `Failed to upload ${image.file.name}.`);
+        }
+      } catch (err) {
+        console.error(`Error uploading ${image.file.name}:`, err);
+        setMessage(`An error occurred while uploading ${image.file.name}.`);
       }
-    } catch (err) {
-      console.error('Error:', err);
-      setMessage('An error occurred while uploading images.');
-    } finally {
-      setLoading(false);
     }
+
+    setLoading(false);
+    setUploadedFiles([]); // Clear uploaded files after submission
   };
 
   return (
