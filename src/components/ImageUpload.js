@@ -11,7 +11,6 @@ function ImageUpload({ onUpload }) {
 
   return (
     <div>
-      {/* File Input */}
       <input
         type="file"
         multiple
@@ -19,7 +18,6 @@ function ImageUpload({ onUpload }) {
         onChange={handleFileChange}
         style={{ marginBottom: '10px' }}
       />
-      {/* Display File Names */}
       <div style={{ marginTop: '10px' }}>
         {selectedFiles.map((file, index) => (
           <p key={index}>{file.name}</p>
